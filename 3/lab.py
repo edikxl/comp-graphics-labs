@@ -5,15 +5,17 @@ import cv2
 import numpy as np
 from PIL import Image
 
+
 def getDataFromFile(path: str) -> str:
     with open(path, 'r') as file:
         return file.read()
+
 
 def getCordsFromData(data: str) -> set:
     x = []
     y = []
 
-    data = data.split('\n') 
+    data = data.split('\n')
     for string in data:
         if string:
             x_, y_ = string.split(' ')
@@ -23,25 +25,28 @@ def getCordsFromData(data: str) -> set:
 
     return x, y
 
-def getImageArrayFromCords(x: List[int], y: List[int], color: List[int]) -> list:
-    imageArray = np.zeros([ max(y) + 1, max(x) + 1, 4], dtype=np.uint8)
+
+def getImageArrayFromCords(width: int, height: int, rgb: int, x: List[int], y: List[int], color: List[int]) -> list:
+    imageArray = np.zeros([height, width, rgb], dtype=np.uint8)
 
     for i in range(len(x)):
         imageArray[y[i]][x[i]] = color
-    
+
     return imageArray
 
+
 def enchanceImage(image):
-    image = image.resize((540, 960), Image.LANCZOS)
     image = image.rotate(90, expand=True)
 
     return image
 
+
 def changeExtToPng(path: str) -> str:
     return path[:path.find('.') + 1] + 'png'
 
+
 def convexHullFromImage(x: List[int], y: List[int], savePath: str, lineColor: set) -> str:
-    dots = [ [[x[i], y[i]]] for i in range(len(x)) ]
+    dots = [[[x[i], y[i]]] for i in range(len(x))]
     dots = np.array(dots)
     hull = cv2.convexHull(dots)
 
@@ -51,7 +56,11 @@ def convexHullFromImage(x: List[int], y: List[int], savePath: str, lineColor: se
 
     return Image.open(savePath)
 
+
 if __name__ == '__main__':
+    WIDTH = 540
+    HEIGHT = 960
+    RGB = 4  # RGBA
     COLOR = [0, 0, 0, 255]
     LINE_COLOR = [255, 0, 0, 255]
 
@@ -60,7 +69,7 @@ if __name__ == '__main__':
 
     data = getDataFromFile(datasetPath)
     x, y = getCordsFromData(data)
-    imageArray = getImageArrayFromCords(x, y, COLOR)
+    imageArray = getImageArrayFromCords(WIDTH, HEIGHT, RGB, x, y, COLOR)
 
     image = Image.fromarray(imageArray)
     image.save(savePath)
